@@ -65,7 +65,11 @@ func OAuth2Callback(w http.ResponseWriter, r *http.Request) {
 	request, _ := http.NewRequest("GET", url, nil)
 
 	request.Header.Set("Authorization", "Bearer "+tok.AccessToken)
-	response, _ := client.Do(request)
+	response, err := client.Do(request)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	defer response.Body.Close()
 
@@ -74,8 +78,13 @@ func OAuth2Callback(w http.ResponseWriter, r *http.Request) {
 	var user *common.AuthUserInfo
 	_ = json.Unmarshal(contents, &user)
 
-	session.Values["userName"] = user.UserName
-	session.Values["email"] = user.Email
+	userStr, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	session.Values["userInfo"] = string(userStr[:])
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/", http.StatusFound)

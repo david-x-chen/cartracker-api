@@ -28,5 +28,5 @@ func FileServer(w http.ResponseWriter, r *http.Request) {
 
 	// Super simple. Doesn't set any cache headers, check existence, avoid race conditions, etc.
 	w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(file)))
-	http.ServeFile(w, r, "./static/"+file)
+	http.ServeFile(w, r, "./static/"+id+"/"+file)
 }
