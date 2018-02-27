@@ -1,4 +1,4 @@
-package main
+package controllers
 
 import (
 	"encoding/json"
@@ -9,14 +9,38 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/david-x-chen/cartracker.api/common"
+	"github.com/david-x-chen/cartracker.api/data"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )
 
 // Index - home page
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome!")
-	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	session, err := common.OAuthStore.Get(r, "session_cookie")
+	if err != nil {
+		fmt.Fprintln(w, "aborted")
+		return
+	}
+
+	if session.Values["email"] == nil {
+		url := "/authorize"
+		// redirect user to authorize page
+		http.Redirect(w, r, url, http.StatusFound)
+	} else {
+		//fmt.Fprintf(w, "Welcome! %s", session.Values["email"].(string))
+		var userEmail = session.Values["email"].(string)
+
+		common.PushStaticResource(w, "/static/css/style.css")
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		fullData := map[string]interface{}{
+			"userEmail": userEmail,
+		}
+		fmt.Print(userEmail)
+		common.RenderTemplate(w, r, common.Tmpls["home.html"], "base", fullData)
+
+	}
 }
 
 // GetCarTrackerInfo getting all the records
@@ -24,7 +48,7 @@ func GetCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 
-	carTrackInfoList := GetData(nil, &waitGroup, mongoSession)
+	carTrackInfoList := data.GetData(nil, &waitGroup, common.MongoSession)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -45,7 +69,7 @@ func GetCarTrackerInfoByType(w http.ResponseWriter, r *http.Request) {
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 
-	results := GetData(query, &waitGroup, mongoSession)
+	results := data.GetData(query, &waitGroup, common.MongoSession)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -61,7 +85,7 @@ func GetCarTrackerInfoByType(w http.ResponseWriter, r *http.Request) {
 func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	var trackerInfo CarTrackInfo
+	var trackerInfo common.CarTrackInfo
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
 	if err != nil {
@@ -80,7 +104,7 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var required = stringInSlice(params["trackingType"], requiredInfoTypes)
+	var required = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
 
 	if !required || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
 		w.WriteHeader(422) // unprocessable entity
@@ -92,7 +116,7 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 
-	addedInfo, addedErr := AddData(trackerInfo, &waitGroup, mongoSession)
+	addedInfo, addedErr := data.AddData(trackerInfo, &waitGroup, common.MongoSession)
 	if addedErr != nil {
 		panic(addedErr)
 	}

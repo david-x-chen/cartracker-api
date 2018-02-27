@@ -1,8 +1,9 @@
-package main
+package routers
 
 import (
 	"net/http"
 
+	"github.com/david-x-chen/cartracker.api/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -13,7 +14,7 @@ func NewRouter() *mux.Router {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
+		handler = logger.Logger(handler, route.Name)
 
 		router.
 			Methods(route.Method).
@@ -21,5 +22,8 @@ func NewRouter() *mux.Router {
 			Name(route.Name).
 			Handler(handler)
 	}
+
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
 	return router
 }

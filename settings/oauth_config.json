@@ -1,0 +1,7 @@
+{
+    "clientSecret": "cartracker_api9527",
+    "clientID": "cartracker-api",
+    "redirectUrl": "http://localhost:8000/oauth2callback",
+    "scopes": ["openid", "email", "profile"],
+    "cookieSecret": "cartracker_cookie"
+}

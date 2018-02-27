@@ -1,71 +1,23 @@
-package main
+package data
 
 import (
-	"io/ioutil"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/david-x-chen/cartracker.api/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/yaml.v2"
 )
 
-type (
-	config struct {
-		// MongoDBHosts host server
-		MongoDBHosts string `yaml:"mongodbhosts"` //"localhost"
-		// AuthDatabase database
-		AuthDatabase string `yaml:"authdatabase"` //"cartracker"
-		// AuthUserName user name of mongodb
-		AuthUserName string `yaml:"authusername"`
-		// AuthPassword password of mongodb user
-		AuthPassword string `yaml:"authpassword"`
-		// TestDatabase test db to connect
-		TestDatabase string `yaml:"testdatabase"` //"cartracker"
-	}
-
-	// CarTrackInfo Car track information
-	CarTrackInfo struct {
-		TrackDate    time.Time `json:"trackdate,omitempty"`
-		InfoType     string    `json:"infotype,omitempty"`
-		StringValue  string    `json:"stringvalue,omitempty"`
-		NumericValue float32   `json:"numericvalue,omitempty"`
-		ActualValue  string    `json:"actualvalue,omitempty"`
-	}
-)
-
-var requiredInfoTypes = []string{
-	"RPM", "SPEED", "STATUS", "ENGINE_LOAD", "SHORT_FUEL_TRIM_1", "LONG_FUEL_TRIM_1",
-	"THROTTLE_POS", "COMMANDED_EQUIV_RATIO", "MAF", "INTAKE_TEMP", "COOLANT_TEMP",
-	"CONTROL_MODULE_VOLTAGE", "TIMING_ADVANCE", "RUN_TIME"}
-
-func (c *config) getConfig() *config {
-	yamlFile, err := ioutil.ReadFile("config.yaml")
-	if err != nil {
-		log.Printf("yamlFile.Get err #%v ", err)
-	}
-
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
-
-	return c
-}
-
-var mongoConfig config
-
-//
-func connect() *mgo.Session {
-	mongoConfig.getConfig()
-
+// InitMongoSession initialises session
+func InitMongoSession() *mgo.Session {
 	mongoDBDialInfo := &mgo.DialInfo{
-		Addrs:    []string{mongoConfig.MongoDBHosts},
+		Addrs:    []string{common.MongoConfig.MongoDBHosts},
 		Timeout:  60 * time.Second,
-		Database: mongoConfig.AuthDatabase,
-		//Username: mongoConfig.AuthUserName,
-		//Password: mongoConfig.AuthPassword,
+		Database: common.MongoConfig.AuthDatabase,
+		//Username: common.MongoConfig.AuthUserName,
+		//Password: common.MongoConfig.AuthPassword,
 	}
 
 	mongoSession, err := mgo.DialWithInfo(mongoDBDialInfo)
@@ -81,7 +33,7 @@ func connect() *mgo.Session {
 }
 
 // GetData is a function that is launched as a goroutine to perform the MongoDB work.
-func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) *[]CarTrackInfo {
+func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) *[]common.CarTrackInfo {
 	// Decrement the wait group count so the program knows this
 	// has been completed once the goroutine exits.
 	defer waitGroup.Done()
@@ -93,7 +45,7 @@ func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session)
 	defer sessionCopy.Close()
 
 	// Get a collection to execute the query against.
-	collection := sessionCopy.DB(mongoConfig.TestDatabase).C("obd2info")
+	collection := sessionCopy.DB(common.MongoConfig.TestDatabase).C("obd2info")
 
 	// Index
 	index := mgo.Index{
@@ -109,7 +61,7 @@ func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session)
 		panic(err)
 	}
 
-	carTrackInfoList := new([]CarTrackInfo)
+	carTrackInfoList := new([]common.CarTrackInfo)
 	// Retrieve the list of track information.
 	err = collection.Find(query).All(carTrackInfoList)
 	if err != nil {
@@ -123,14 +75,14 @@ func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session)
 }
 
 // AddData is the function to insert record to db
-func AddData(info CarTrackInfo, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) (*mgo.ChangeInfo, error) {
+func AddData(info common.CarTrackInfo, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) (*mgo.ChangeInfo, error) {
 	defer waitGroup.Done()
 
 	sessionCopy := mongoSession.Copy()
 	defer sessionCopy.Close()
 
 	// Get a collection to execute the query against.
-	collection := sessionCopy.DB(mongoConfig.TestDatabase).C("obd2info")
+	collection := sessionCopy.DB(common.MongoConfig.TestDatabase).C("obd2info")
 
 	// Index
 	index := mgo.Index{
@@ -166,7 +118,7 @@ func RemoveAllData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Se
 	defer sessionCopy.Close()
 
 	// Get a collection to execute the query against.
-	collection := sessionCopy.DB(mongoConfig.TestDatabase).C("obd2info")
+	collection := sessionCopy.DB(common.MongoConfig.TestDatabase).C("obd2info")
 
 	// Index
 	index := mgo.Index{

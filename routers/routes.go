@@ -1,7 +1,9 @@
-package main
+package routers
 
 import (
 	"net/http"
+
+	"github.com/david-x-chen/cartracker.api/controllers"
 )
 
 // Route type
@@ -20,24 +22,42 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		Index,
+		controllers.Index,
+	},
+	Route{
+		"FileServer",
+		"GET",
+		"/static/{cache_id}/{filename}",
+		controllers.FileServer,
+	},
+	Route{
+		"Authorize",
+		"GET",
+		"/authorize",
+		controllers.Authorize,
+	},
+	Route{
+		"OAuth2Callback",
+		"GET",
+		"/oauth2callback",
+		controllers.OAuth2Callback,
 	},
 	Route{
 		"GetCarTracker",
 		"GET",
 		"/cartracker",
-		GetCarTrackerInfo,
+		controllers.GetCarTrackerInfo,
 	},
 	Route{
 		"GetCarTrackerInfoByType",
 		"GET",
 		"/cartracker/{trackingType}",
-		GetCarTrackerInfoByType,
+		controllers.GetCarTrackerInfoByType,
 	},
 	Route{
 		"CreateCarTrackerInfo",
 		"POST",
 		"/cartracker/{trackingType}",
-		CreateCarTrackerInfo,
+		controllers.CreateCarTrackerInfo,
 	},
 }

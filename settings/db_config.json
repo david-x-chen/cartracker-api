@@ -1,0 +1,7 @@
+{
+    "mongodbhosts": "localhost",
+    "authdatabase": "cartracker",
+    "authusername": "",
+    "authpassword": "",
+    "testdatabase": "cartracker"
+}

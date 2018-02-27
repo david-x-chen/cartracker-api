@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"strings"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetConfig(t *testing.T) {
-	var c config
+	var c DbConfig
 	c.getConfig()
 
 	if strings.Contains(c.AuthDatabase, "cartrack") {
