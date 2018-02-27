@@ -52,6 +52,7 @@ type (
 		Host         string        `json:"host"`
 		ReadTimeout  time.Duration `json:"readTimeout"`
 		WriteTimeout time.Duration `json:"writeTimeout"`
+		SubLocation  string        `json:"subLocation"`
 	}
 
 	// DbConfig is db configuration

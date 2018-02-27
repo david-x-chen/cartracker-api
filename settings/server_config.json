@@ -1,5 +1,6 @@
 {
     "host": "0.0.0.0:8000",
     "readTimeout": 1,
-    "writeTimeout": 5
+    "writeTimeout": 5,
+    "subLocation": "car"
 }
