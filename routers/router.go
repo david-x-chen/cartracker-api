@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/david-x-chen/cartracker.api/common"
@@ -11,23 +12,20 @@ import (
 
 // NewRouter setting up the router
 func NewRouter() *mux.Router {
+	var loc = common.ServerCfg.SubLocation
 	router := mux.NewRouter().StrictSlash(true)
+	if len(loc) > 0 {
+		router = router.PathPrefix(fmt.Sprintf("/%s/", loc)).Subrouter()
+	}
 	for _, route := range routes {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
 		handler = logger.Logger(handler, route.Name)
 
-		var loc = common.ServerCfg.SubLocation
-		var pattern = route.Pattern
-
-		if len(loc) > 0 {
-			pattern = "/" + loc + pattern
-		}
-
 		router.
 			Methods(route.Method).
-			Path(pattern).
+			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
 	}

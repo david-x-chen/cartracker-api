@@ -33,6 +33,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 		fullData := map[string]interface{}{
 			"userEmail": userEmail,
+			"prefix":    common.ServerCfg.SubLocation,
 		}
 		fmt.Print(userEmail)
 		common.RenderTemplate(w, r, common.Tmpls["home.html"], "base", fullData)

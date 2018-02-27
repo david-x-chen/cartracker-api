@@ -19,7 +19,11 @@ func Authorized(w http.ResponseWriter, r *http.Request) (*common.AuthUserInfo, b
 	var userInfo = "{}"
 
 	if session.Values["userInfo"] == nil {
+		var loc = common.ServerCfg.SubLocation
 		url := "/authorize"
+		if len(loc) > 0 {
+			url = fmt.Sprintf("/%s/authorize", loc)
+		}
 		// redirect user to authorize page
 		http.Redirect(w, r, url, http.StatusFound)
 	} else {
