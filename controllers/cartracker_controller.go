@@ -128,14 +128,15 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		trackerInfo.ActualValue += ";" + userEmail
 
-		trackerEntiy := new(common.CarTrackEntity)
-		trackerEntiy.ActualValue = trackerInfo.ActualValue
-		trackerEntiy.InfoType = trackerInfo.InfoType
-		trackerEntiy.NumericValue = trackerInfo.NumericValue
-		trackerEntiy.StringValue = trackerInfo.StringValue
-
 		sec, dec := math.Modf(trackerInfo.TrackDate)
-		trackerEntiy.TrackDate = time.Unix(int64(sec), int64(dec*(1e9)))
+
+		trackerEntiy := common.CarTrackEntity{
+			ActualValue:  trackerInfo.ActualValue,
+			InfoType:     trackerInfo.InfoType,
+			NumericValue: trackerInfo.NumericValue,
+			StringValue:  trackerInfo.StringValue,
+			TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
+		}
 
 		addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
 		if addedErr != nil {
