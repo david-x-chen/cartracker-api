@@ -132,10 +132,12 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		var existing = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
 
-		if !existing || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
+		if !existing || !strings.EqualFold(params["trackingType"], trackerEntiy.InfoType) {
 			w.WriteHeader(422) // unprocessable entity
-			var msg = "Tracking type not matching! " + params["trackingType"]
-			msg = msg + " " + string(trackerBytes[:])
+			var msg = "Tracking type not matching! "
+			msg += " type in URL:" + params["trackingType"]
+			msg += " type in Data: " + trackerEntiy.InfoType
+			msg += " " + string(trackerBytes[:])
 			json.NewEncoder(w).Encode(msg)
 			return
 		}
