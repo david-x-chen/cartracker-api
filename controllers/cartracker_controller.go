@@ -113,6 +113,8 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		postedData := fmt.Sprintf("%v", trackerInfo)
+
 		sec, dec := math.Modf(trackerInfo.TrackDate)
 
 		var trackerEntiy = &common.CarTrackEntity{
@@ -138,7 +140,8 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			var msg = "Tracking type not matching! "
 			msg += " type in URL:" + params["trackingType"]
 			msg += " type in Data: " + trackerEntiy.InfoType
-			msg += " " + string(trackerBytes[:])
+			msg += " posted data: " + postedData
+			msg += " converted data: " + string(trackerBytes[:])
 			json.NewEncoder(w).Encode(msg)
 			return
 		}
