@@ -75,7 +75,7 @@ func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session)
 }
 
 // AddData is the function to insert record to db
-func AddData(info common.CarTrackEntity, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) (*mgo.ChangeInfo, error) {
+func AddData(info *common.CarTrackEntity, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) (*mgo.ChangeInfo, error) {
 	defer waitGroup.Done()
 
 	sessionCopy := mongoSession.Copy()

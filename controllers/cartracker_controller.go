@@ -115,12 +115,13 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		sec, dec := math.Modf(trackerInfo.TrackDate)
 
-		var trackerEntiy = *newCarTrackEntity()
-		trackerEntiy.ActualValue = trackerInfo.ActualValue + ";" + userEmail
-		trackerEntiy.InfoType = trackerInfo.InfoType
-		trackerEntiy.NumericValue = trackerInfo.NumericValue
-		trackerEntiy.StringValue = trackerInfo.StringValue
-		trackerEntiy.TrackDate = time.Unix(int64(sec), int64(dec*(1e9)))
+		var trackerEntiy = &common.CarTrackEntity{
+			ActualValue:  trackerInfo.ActualValue + ";" + userEmail,
+			InfoType:     trackerInfo.InfoType,
+			NumericValue: trackerInfo.NumericValue,
+			StringValue:  trackerInfo.StringValue,
+			TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
+		}
 
 		trackerBytes, err := json.Marshal(trackerEntiy)
 		if err != nil {
@@ -158,8 +159,4 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		waitGroup.Wait()
 	}
-}
-
-func newCarTrackEntity() *common.CarTrackEntity {
-	return &common.CarTrackEntity{}
 }
