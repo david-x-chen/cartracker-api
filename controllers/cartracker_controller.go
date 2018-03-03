@@ -112,13 +112,10 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 		}
-
-		trackerInfo.ActualValue += ";" + userEmail
-
 		sec, dec := math.Modf(trackerInfo.TrackDate)
 
 		trackerEntiy := common.CarTrackEntity{
-			ActualValue:  trackerInfo.ActualValue,
+			ActualValue:  trackerInfo.ActualValue + ";" + userEmail,
 			InfoType:     trackerInfo.InfoType,
 			NumericValue: trackerInfo.NumericValue,
 			StringValue:  trackerInfo.StringValue,
@@ -133,9 +130,9 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		var required = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
+		var existing = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
 
-		if !required || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
+		if !existing || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
 			w.WriteHeader(422) // unprocessable entity
 			var msg = "Tracking type not matching! " + params["trackingType"]
 			msg = msg + " " + string(trackerBytes[:])

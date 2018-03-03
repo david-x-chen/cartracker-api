@@ -13,6 +13,9 @@ func StringInSlice(a string, list []string) bool {
 	var result bool
 	for _, b := range list {
 		result = strings.EqualFold(b, a)
+		if result {
+			break
+		}
 	}
 	return result
 }
