@@ -114,7 +114,7 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 		}
 		sec, dec := math.Modf(trackerInfo.TrackDate)
 
-		trackerEntiy := common.CarTrackEntity{
+		var trackerEntiy = common.CarTrackEntity{
 			ActualValue:  trackerInfo.ActualValue + ";" + userEmail,
 			InfoType:     trackerInfo.InfoType,
 			NumericValue: trackerInfo.NumericValue,
@@ -122,7 +122,7 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
 		}
 
-		trackerBytes, err := json.Marshal(&trackerEntiy)
+		trackerBytes, err := json.Marshal(trackerEntiy)
 		if err != nil {
 			w.WriteHeader(422) // unprocessable entity
 			if err := json.NewEncoder(w).Encode(err); err != nil {
