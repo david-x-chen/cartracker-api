@@ -113,19 +113,6 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		var required = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
-
-		if !required || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
-			w.WriteHeader(422) // unprocessable entity
-			var msg = "Tracking type not matching! " + params["trackingType"]
-			msg = msg + " " + string(body[:])
-			json.NewEncoder(w).Encode(msg)
-			return
-		}
-
-		var waitGroup sync.WaitGroup
-		waitGroup.Add(1)
-
 		trackerInfo.ActualValue += ";" + userEmail
 
 		sec, dec := math.Modf(trackerInfo.TrackDate)
@@ -137,6 +124,27 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 			StringValue:  trackerInfo.StringValue,
 			TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
 		}
+
+		trackerBytes, err := json.Marshal(&trackerEntiy)
+		if err != nil {
+			w.WriteHeader(422) // unprocessable entity
+			if err := json.NewEncoder(w).Encode(err); err != nil {
+				panic(err)
+			}
+		}
+
+		var required = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
+
+		if !required || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
+			w.WriteHeader(422) // unprocessable entity
+			var msg = "Tracking type not matching! " + params["trackingType"]
+			msg = msg + " " + string(trackerBytes[:])
+			json.NewEncoder(w).Encode(msg)
+			return
+		}
+
+		var waitGroup sync.WaitGroup
+		waitGroup.Add(1)
 
 		addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
 		if addedErr != nil {
