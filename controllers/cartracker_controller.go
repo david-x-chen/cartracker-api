@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/david-x-chen/cartracker.api/common"
 	"github.com/david-x-chen/cartracker.api/data"
@@ -115,7 +117,8 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		if !required || !strings.EqualFold(params["trackingType"], trackerInfo.InfoType) {
 			w.WriteHeader(422) // unprocessable entity
-			var msg = "Tracking type not matching!"
+			var msg = "Tracking type not matching! " + params["trackingType"]
+			msg = msg + " " + string(body[:])
 			json.NewEncoder(w).Encode(msg)
 			return
 		}
@@ -125,7 +128,16 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		trackerInfo.ActualValue += ";" + userEmail
 
-		addedInfo, addedErr := data.AddData(trackerInfo, &waitGroup, common.MongoSession)
+		trackerEntiy := new(common.CarTrackEntity)
+		trackerEntiy.ActualValue = trackerInfo.ActualValue
+		trackerEntiy.InfoType = trackerInfo.InfoType
+		trackerEntiy.NumericValue = trackerInfo.NumericValue
+		trackerEntiy.StringValue = trackerInfo.StringValue
+
+		sec, dec := math.Modf(trackerInfo.TrackDate)
+		trackerEntiy.TrackDate = time.Unix(int64(sec), int64(dec*(1e9)))
+
+		addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
 		if addedErr != nil {
 			panic(addedErr)
 		}

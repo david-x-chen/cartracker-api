@@ -89,6 +89,15 @@ type (
 
 	// CarTrackInfo Car track information
 	CarTrackInfo struct {
+		TrackDate    float64 `json:"trackdate,omitempty"`
+		InfoType     string  `json:"infotype,omitempty"`
+		StringValue  string  `json:"stringvalue,omitempty"`
+		NumericValue float32 `json:"numericvalue,omitempty"`
+		ActualValue  string  `json:"actualvalue,omitempty"`
+	}
+
+	// CarTrackEntity Car track information
+	CarTrackEntity struct {
 		TrackDate    time.Time `json:"trackdate,omitempty"`
 		InfoType     string    `json:"infotype,omitempty"`
 		StringValue  string    `json:"stringvalue,omitempty"`
