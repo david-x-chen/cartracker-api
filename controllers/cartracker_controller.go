@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"math"
 	"net/http"
@@ -94,31 +93,36 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		params := mux.Vars(r)
 
-		var trackerInfo common.CarTrackInfo
-		body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+		body, err1 := ioutil.ReadAll(r.Body)
+		if err1 != nil {
+			panic(err1)
+		}
 
+		rawBody := (*json.RawMessage)(&body)
+		bytesBody, err := rawBody.MarshalJSON()
 		if err != nil {
 			panic(err)
 		}
-		if err := r.Body.Close(); err != nil {
-			panic(err)
+		fmt.Printf("%v\n", string(bytesBody[:]))
+
+		var trackerInfo common.CarTrackInfo
+
+		errUnmarshal := json.Unmarshal(*rawBody, &trackerInfo)
+		if errUnmarshal != nil {
+			panic(errUnmarshal)
 		}
+
+		defer r.Body.Close()
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-		if err := json.Unmarshal(body, &trackerInfo); err != nil {
-			w.WriteHeader(422) // unprocessable entity
-			if err := json.NewEncoder(w).Encode(err); err != nil {
-				panic(err)
-			}
-		}
-
 		postedData := fmt.Sprintf("%v", trackerInfo)
+		//fmt.Println(postedData)
 
 		sec, dec := math.Modf(trackerInfo.TrackDate)
 
 		var trackerEntiy = &common.CarTrackEntity{
-			ActualValue:  trackerInfo.ActualValue + ";" + userEmail,
+			ActualValue:  trackerInfo.ActualValue + " " + userEmail,
 			InfoType:     trackerInfo.InfoType,
 			NumericValue: trackerInfo.NumericValue,
 			StringValue:  trackerInfo.StringValue,
@@ -127,10 +131,7 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		trackerBytes, err := json.Marshal(trackerEntiy)
 		if err != nil {
-			w.WriteHeader(422) // unprocessable entity
-			if err := json.NewEncoder(w).Encode(err); err != nil {
-				panic(err)
-			}
+			panic(err)
 		}
 
 		var existing = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
@@ -148,6 +149,8 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 
 		var waitGroup sync.WaitGroup
 		waitGroup.Add(1)
+
+		println(string(trackerBytes[:]))
 
 		addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
 		if addedErr != nil {

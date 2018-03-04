@@ -33,7 +33,7 @@ func InitMongoSession() *mgo.Session {
 }
 
 // GetData is a function that is launched as a goroutine to perform the MongoDB work.
-func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) *[]common.CarTrackInfo {
+func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session) *[]common.CarTrackEntity {
 	// Decrement the wait group count so the program knows this
 	// has been completed once the goroutine exits.
 	defer waitGroup.Done()
@@ -61,17 +61,17 @@ func GetData(query bson.M, waitGroup *sync.WaitGroup, mongoSession *mgo.Session)
 		panic(err)
 	}
 
-	carTrackInfoList := new([]common.CarTrackInfo)
+	carTrackEntityList := new([]common.CarTrackEntity)
 	// Retrieve the list of track information.
-	err = collection.Find(query).All(carTrackInfoList)
+	err = collection.Find(query).All(carTrackEntityList)
 	if err != nil {
 		log.Printf("RunQuery: ERROR: %s\n", err)
 		return nil
 	}
 
-	log.Printf("RunQuery: Count[%d]\n", len(*carTrackInfoList))
+	log.Printf("RunQuery: Count[%d]\n", len(*carTrackEntityList))
 
-	return carTrackInfoList
+	return carTrackEntityList
 }
 
 // AddData is the function to insert record to db
@@ -99,8 +99,6 @@ func AddData(info *common.CarTrackEntity, waitGroup *sync.WaitGroup, mongoSessio
 	}
 
 	var ID = bson.NewObjectId()
-
-	info.TrackDate = time.Now()
 
 	upsertInfo, err := collection.Upsert(bson.M{"_id": ID}, info)
 	if err != nil {

@@ -89,7 +89,7 @@ type (
 
 	// CarTrackInfo Car track information
 	CarTrackInfo struct {
-		TrackDate    float64 `json:"trackdate"`
+		TrackDate    float64 `json:"trackdateUnix"`
 		InfoType     string  `json:"infotype"`
 		StringValue  string  `json:"stringvalue"`
 		NumericValue float32 `json:"numericvalue"`
