@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/david-x-chen/cartracker.api/common"
+	"cartracker.api/common"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"

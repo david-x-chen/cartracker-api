@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/david-x-chen/cartracker.api/common"
+	"cartracker.api/common"
 
-	"github.com/david-x-chen/cartracker.api/logger"
+	"cartracker.api/logger"
 	"github.com/gorilla/mux"
 )
 

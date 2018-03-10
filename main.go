@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/david-x-chen/cartracker.api/common"
-	"github.com/david-x-chen/cartracker.api/data"
-	"github.com/david-x-chen/cartracker.api/routers"
-	"github.com/david-x-chen/cartracker.api/settings"
+	"cartracker.api/common"
+	"cartracker.api/data"
+	"cartracker.api/routers"
+	"cartracker.api/settings"
 	"github.com/gorilla/sessions"
 	"github.com/urfave/negroni"
 )

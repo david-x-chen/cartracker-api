@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/david-x-chen/cartracker.api/common"
-	"github.com/david-x-chen/cartracker.api/data"
-	"github.com/david-x-chen/cartracker.api/services"
+	"cartracker.api/common"
+	"cartracker.api/data"
+	"cartracker.api/services"
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2/bson"
 )

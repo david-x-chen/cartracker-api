@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/david-x-chen/cartracker.api/common"
+	"cartracker.api/common"
 	"golang.org/x/oauth2"
 )
 

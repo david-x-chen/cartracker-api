@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/david-x-chen/cartracker.api/common"
+	"cartracker.api/common"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

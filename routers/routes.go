@@ -3,7 +3,7 @@ package routers
 import (
 	"net/http"
 
-	"github.com/david-x-chen/cartracker.api/controllers"
+	"cartracker.api/controllers"
 )
 
 // Route type

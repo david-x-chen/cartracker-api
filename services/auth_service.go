@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/david-x-chen/cartracker.api/common"
+	"cartracker.api/common"
 )
 
 // Authorized function
