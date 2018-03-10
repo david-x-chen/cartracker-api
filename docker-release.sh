@@ -10,7 +10,7 @@ IMAGE=cartrackerapi
 git pull
 
 # bump version
-docker run --rm -v /tmp/cartrackerapi_app:/app/settings davidxchen/cartrackerapi patch
+#docker run --rm -v /tmp/cartrackerapi_app:/app/settings davidxchen/cartrackerapi patch
 version=`cat VERSION`
 echo "version: $version"
 

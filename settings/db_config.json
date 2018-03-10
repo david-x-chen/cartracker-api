@@ -1,5 +1,5 @@
 {
-    "mongodbhosts": "192.168.139.218",
+    "mongodbhosts": "localhost",
     "authdatabase": "cartracker",
     "authusername": "",
     "authpassword": "",
