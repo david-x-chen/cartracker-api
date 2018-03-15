@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"cartracker.api/common"
 	"golang.org/x/oauth2"
@@ -35,6 +36,16 @@ func initServerConfig() {
 	if err != nil {
 		log.Fatalf("Unmarshal: %v", err)
 	}
+
+	srvHost := os.Getenv("SRV_HOST")
+	if srvHost != "" && len(srvHost) > 0 {
+		common.ServerCfg.Host = srvHost
+	}
+
+	subLoc := os.Getenv("SRV_SUBDOMAIN")
+	if subLoc != "" && len(subLoc) > 0 {
+		common.ServerCfg.SubLocation = subLoc
+	}
 }
 
 // InitOAuthConfig initialises the oauth2
@@ -47,6 +58,26 @@ func initOAuthConfig() {
 	err = json.Unmarshal(jsonConfigFile, &common.OAuthCfgInfo)
 	if err != nil {
 		log.Fatalf("Unmarshal: %v", err)
+	}
+
+	redirectURL := os.Getenv("AUTH_REDIRECT_URL")
+	if redirectURL != "" && len(redirectURL) > 0 {
+		common.OAuthCfgInfo.RedirectURL = redirectURL
+	}
+
+	clientSecret := os.Getenv("AUTH_CLIENTSECRET")
+	if clientSecret != "" && len(clientSecret) > 0 {
+		common.OAuthCfgInfo.ClientSecret = clientSecret
+	}
+
+	clientID := os.Getenv("AUTH_CLIENTID")
+	if clientID != "" && len(clientID) > 0 {
+		common.OAuthCfgInfo.ClientID = clientID
+	}
+
+	cookieSecret := os.Getenv("AUTH_COOKIESECRET")
+	if cookieSecret != "" && len(cookieSecret) > 0 {
+		common.OAuthCfgInfo.Secret = cookieSecret
 	}
 
 	common.OAuth2Cfg = &oauth2.Config{
@@ -71,6 +102,27 @@ func initDbConfig() {
 	err = json.Unmarshal(dbConfigFile, &common.MongoConfig)
 	if err != nil {
 		log.Fatalf("Unmarshal: %v", err)
+	}
+
+	dbhost := os.Getenv("DB_HOST")
+	if dbhost != "" && len(dbhost) > 0 {
+		common.MongoConfig.MongoDBHosts = dbhost
+	}
+
+	dbName := os.Getenv("DB_NAME")
+	if dbName != "" && len(dbName) > 0 {
+		common.MongoConfig.AuthDatabase = dbName
+		common.MongoConfig.TestDatabase = dbName
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	if dbUser != "" && len(dbUser) > 0 {
+		common.MongoConfig.AuthUserName = dbUser
+	}
+
+	dbPwd := os.Getenv("DB_PWD")
+	if dbPwd != "" && len(dbPwd) > 0 {
+		common.MongoConfig.AuthPassword = dbPwd
 	}
 }
 
