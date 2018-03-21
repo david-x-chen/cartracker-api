@@ -32,9 +32,14 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		//common.PushStaticResource(w, "/static/css/style.css")
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
+		var prefix = common.ServerCfg.SubLocation
+		if len(prefix) > 0 {
+			prefix = "/" + prefix
+		}
+
 		fullData := map[string]interface{}{
 			"userEmail": userEmail,
-			"prefix":    common.ServerCfg.SubLocation,
+			"prefix":    prefix,
 		}
 		fmt.Print(userEmail)
 		common.RenderTemplate(w, r, common.Tmpls["home.html"], "base", fullData)
