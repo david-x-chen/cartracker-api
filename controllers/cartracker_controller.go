@@ -14,6 +14,7 @@ import (
 	"cartracker.api/data"
 	"cartracker.api/services"
 	"github.com/gorilla/mux"
+	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -86,6 +87,10 @@ func GetCarTrackerInfoByType(w http.ResponseWriter, r *http.Request) {
 
 // CreateCarTrackerInfo is the function to create record with posted data from client side
 func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
+	handlePostRequest(w, r, true)
+}
+
+func handlePostRequest(w http.ResponseWriter, r *http.Request, singleObj bool) {
 	//userInfo, isAuthorized, err := services.Authorized(w, r)
 	//if err != nil {
 	//	fmt.Fprintln(w, "aborted")
@@ -111,63 +116,88 @@ func CreateCarTrackerInfo(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("%v\n", string(bytesBody[:]))
 
 		var trackerInfo common.CarTrackInfo
+		var trackerInfoList []common.CarTrackInfo
 
-		errUnmarshal := json.Unmarshal(*rawBody, &trackerInfo)
-		if errUnmarshal != nil {
-			panic(errUnmarshal)
+		if singleObj {
+			errUnmarshal := json.Unmarshal(*rawBody, &trackerInfo)
+			if errUnmarshal != nil {
+				panic(errUnmarshal)
+			}
+
+			trackerInfoList = append(trackerInfoList, trackerInfo)
+		} else {
+			errUnmarshal := json.Unmarshal(*rawBody, &trackerInfoList)
+			if errUnmarshal != nil {
+				panic(errUnmarshal)
+			}
 		}
 
 		defer r.Body.Close()
 
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-		postedData := fmt.Sprintf("%v", trackerInfo)
-		//fmt.Println(postedData)
+		var upsertedIds []bson.ObjectId
 
-		sec, dec := math.Modf(trackerInfo.TrackDate)
+		for _, tracker := range trackerInfoList {
+			var existing = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
 
-		var trackerEntiy = &common.CarTrackEntity{
-			ActualValue:  trackerInfo.ActualValue + " " + userEmail,
-			InfoType:     trackerInfo.InfoType,
-			NumericValue: trackerInfo.NumericValue,
-			StringValue:  trackerInfo.StringValue,
-			TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
-		}
+			if !existing || !strings.EqualFold(params["trackingType"], tracker.InfoType) {
+				w.WriteHeader(422) // unprocessable entity
+				var msg = "Tracking type not matching! "
+				msg += " type in URL:" + params["trackingType"]
+				msg += " type in Data: " + tracker.InfoType
+				json.NewEncoder(w).Encode(msg)
+				return
+			}
 
-		trackerBytes, err := json.Marshal(trackerEntiy)
-		if err != nil {
-			panic(err)
-		}
+			addedInfo := storeData(tracker, userEmail)
 
-		var existing = common.StringInSlice(params["trackingType"], common.RequiredInfoTypes)
-
-		if !existing || !strings.EqualFold(params["trackingType"], trackerEntiy.InfoType) {
-			w.WriteHeader(422) // unprocessable entity
-			var msg = "Tracking type not matching! "
-			msg += " type in URL:" + params["trackingType"]
-			msg += " type in Data: " + trackerEntiy.InfoType
-			msg += " posted data: " + postedData
-			msg += " converted data: " + string(trackerBytes[:])
-			json.NewEncoder(w).Encode(msg)
-			return
-		}
-
-		var waitGroup sync.WaitGroup
-		waitGroup.Add(1)
-
-		println(string(trackerBytes[:]))
-
-		addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
-		if addedErr != nil {
-			panic(addedErr)
+			upsertedIds = append(upsertedIds, addedInfo.UpsertedId.(bson.ObjectId))
 		}
 
 		w.WriteHeader(http.StatusCreated)
 
-		if err := json.NewEncoder(w).Encode(addedInfo.UpsertedId); err != nil {
+		if err := json.NewEncoder(w).Encode(upsertedIds); err != nil {
 			panic(err)
 		}
-
-		waitGroup.Wait()
 	}
+}
+
+func storeData(trackerInfo common.CarTrackInfo, userEmail string) *mgo.ChangeInfo {
+
+	//fmt.Println(postedData)
+
+	sec, dec := math.Modf(trackerInfo.TrackDate)
+
+	var trackerEntiy = &common.CarTrackEntity{
+		ActualValue:  trackerInfo.ActualValue + " " + userEmail,
+		InfoType:     trackerInfo.InfoType,
+		NumericValue: trackerInfo.NumericValue,
+		StringValue:  trackerInfo.StringValue,
+		TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
+	}
+
+	trackerBytes, err := json.Marshal(trackerEntiy)
+	if err != nil {
+		panic(err)
+	}
+
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(1)
+
+	println(string(trackerBytes[:]))
+
+	addedInfo, addedErr := data.AddData(trackerEntiy, &waitGroup, common.MongoSession)
+	if addedErr != nil {
+		panic(addedErr)
+	}
+
+	waitGroup.Wait()
+
+	return addedInfo
+}
+
+// CreateCarTrackerInfoByBatch handles bulkly uploaded data
+func CreateCarTrackerInfoByBatch(w http.ResponseWriter, r *http.Request) {
+	handlePostRequest(w, r, false)
 }

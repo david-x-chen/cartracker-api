@@ -60,4 +60,10 @@ var routes = Routes{
 		"/cartracker/{trackingType}",
 		controllers.CreateCarTrackerInfo,
 	},
+	Route{
+		"CreateCarTrackerInfoByBatch",
+		"POST",
+		"/cartrackers/{trackingType}",
+		controllers.CreateCarTrackerInfoByBatch,
+	},
 }
