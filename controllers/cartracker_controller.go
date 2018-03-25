@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -167,12 +168,22 @@ func storeData(trackerInfo common.CarTrackInfo, userEmail string) *mgo.ChangeInf
 
 	//fmt.Println(postedData)
 
-	sec, dec := math.Modf(trackerInfo.TrackDate)
+	dateVal, parseErr := strconv.ParseFloat(trackerInfo.NumericValue, 64)
+	if parseErr != nil {
+		dateVal = 0
+	}
+
+	sec, dec := math.Modf(dateVal)
+
+	numericVal, parseErr := strconv.ParseFloat(trackerInfo.NumericValue, 32)
+	if parseErr != nil {
+		numericVal = 0
+	}
 
 	var trackerEntiy = &common.CarTrackEntity{
 		ActualValue:  trackerInfo.ActualValue + " " + userEmail,
 		InfoType:     trackerInfo.InfoType,
-		NumericValue: trackerInfo.NumericValue,
+		NumericValue: float32(numericVal),
 		StringValue:  trackerInfo.StringValue,
 		TrackDate:    time.Unix(int64(sec), int64(dec*(1e9))),
 	}

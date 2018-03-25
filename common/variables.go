@@ -89,11 +89,11 @@ type (
 
 	// CarTrackInfo Car track information
 	CarTrackInfo struct {
-		TrackDate    float64 `json:"trackdateUnix"`
-		InfoType     string  `json:"infotype"`
-		StringValue  string  `json:"stringvalue"`
-		NumericValue float32 `json:"numericvalue"`
-		ActualValue  string  `json:"actualvalue"`
+		TrackDate    string `json:"trackdateUnix"`
+		InfoType     string `json:"infotype"`
+		StringValue  string `json:"stringvalue"`
+		NumericValue string `json:"numericvalue"`
+		ActualValue  string `json:"actualvalue"`
 	}
 
 	// CarTrackEntity Car track information
