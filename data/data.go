@@ -86,7 +86,7 @@ func AddData(info *common.CarTrackEntity, waitGroup *sync.WaitGroup, mongoSessio
 
 	// Index
 	index := mgo.Index{
-		Key:        []string{"infotype", "trackdate"},
+		Key:        []string{"_id", "infotype", "trackdate"},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,

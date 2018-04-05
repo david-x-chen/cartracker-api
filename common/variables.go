@@ -30,8 +30,6 @@ var (
 	MongoSession *mgo.Session
 	// MongoConfig is the configuration file
 	MongoConfig *DbConfig
-	// OAuthCfgInfo is the configuration file
-	OAuthCfgInfo *OAuthConfigInfo
 	// OAuth2Cfg is the configuration file
 	OAuth2Cfg *oauth2.Config
 	// OAuthStore stores session info
@@ -67,15 +65,6 @@ type (
 		AuthPassword string `json:"authpassword"`
 		// TestDatabase test db to connect
 		TestDatabase string `json:"testdatabase"` //"cartracker"
-	}
-
-	// OAuthConfigInfo is the json config
-	OAuthConfigInfo struct {
-		ClientSecret string   `json:"clientSecret"`
-		ClientID     string   `json:"clientID"`
-		RedirectURL  string   `json:"redirectUrl"`
-		Scopes       []string `json:"scopes"`
-		Secret       string   `json:"cookieSecret"`
 	}
 
 	// AuthUserInfo authorized user information

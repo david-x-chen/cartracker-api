@@ -13,7 +13,6 @@ import (
 	"cartracker.api/data"
 	"cartracker.api/routers"
 	"cartracker.api/settings"
-	"github.com/gorilla/sessions"
 	"github.com/urfave/negroni"
 )
 
@@ -27,7 +26,6 @@ type HTMLServer struct {
 func main() {
 	settings.Init()
 
-	common.OAuthStore = sessions.NewCookieStore([]byte(common.OAuthCfgInfo.Secret))
 	common.MongoSession = data.InitMongoSession()
 
 	htmlServer := Start(common.ServerCfg)
@@ -56,7 +54,7 @@ func Start(cfg *common.ServerConfig) *HTMLServer {
 	// Create the HTML Server
 	htmlServer := HTMLServer{
 		server: &http.Server{
-			Addr:           cfg.Host,
+			Addr:           ":" + cfg.Host,
 			Handler:        n,
 			ReadTimeout:    cfg.ReadTimeout * time.Second,
 			WriteTimeout:   cfg.WriteTimeout * time.Second,
@@ -64,12 +62,14 @@ func Start(cfg *common.ServerConfig) *HTMLServer {
 		},
 	}
 
+	fmt.Print(cfg.ReadTimeout)
+
 	// Add to the WaitGroup for the listener goroutine
 	htmlServer.wg.Add(1)
 
 	// Start the listener
 	go func() {
-		fmt.Printf("\nHTMLServer : Service started : Host=%v\n", cfg.Host)
+		fmt.Printf("\nHTMLServer : Service started : Host=%v\n", ":"+cfg.Host)
 		htmlServer.server.ListenAndServe()
 		htmlServer.wg.Done()
 	}()

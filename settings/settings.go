@@ -1,24 +1,27 @@
 package settings
 
 import (
-	"encoding/json"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"os"
 
 	"cartracker.api/common"
+	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 )
 
 var configs = map[string]string{
-	"server": "settings/server_config.json",
-	"oauth":  "settings/oauth_config.json",
-	"db":     "settings/db_config.json",
+	"db": "settings/db_config.json",
 }
 
 // Init initialization
 func Init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	initServerConfig()
 	initOAuthConfig()
 	initDbConfig()
@@ -27,15 +30,11 @@ func Init() {
 
 // InitServerConfig site configuration
 func initServerConfig() {
-	serverConfigFile, err := ioutil.ReadFile(configs["server"])
-	if err != nil {
-		log.Printf("serverConfigFile.Get err #%v ", err)
-	}
-
-	err = json.Unmarshal(serverConfigFile, &common.ServerCfg)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
+	common.ServerCfg = new(common.ServerConfig)
+	common.ServerCfg.Host = os.Getenv("HOST")
+	common.ServerCfg.SubLocation = os.Getenv("SUB_LOCACTION")
+	common.ServerCfg.ReadTimeout = 60
+	common.ServerCfg.WriteTimeout = 60
 
 	srvHost := os.Getenv("SRV_HOST")
 	if srvHost != "" && len(srvHost) > 0 {
@@ -50,80 +49,69 @@ func initServerConfig() {
 
 // InitOAuthConfig initialises the oauth2
 func initOAuthConfig() {
-	jsonConfigFile, err := ioutil.ReadFile(configs["oauth"])
-	if err != nil {
-		log.Printf("jsonConfigFile.Get err #%v ", err)
-	}
-
-	err = json.Unmarshal(jsonConfigFile, &common.OAuthCfgInfo)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
-
 	redirectURL := os.Getenv("AUTH_REDIRECT_URL")
-	if redirectURL != "" && len(redirectURL) > 0 {
-		common.OAuthCfgInfo.RedirectURL = redirectURL
+	if redirectURL == "" {
+		redirectURL = os.Getenv("REDIRECT_URL")
 	}
 
 	clientSecret := os.Getenv("AUTH_CLIENTSECRET")
-	if clientSecret != "" && len(clientSecret) > 0 {
-		common.OAuthCfgInfo.ClientSecret = clientSecret
+	if clientSecret == "" {
+		clientSecret = os.Getenv("CLIENT_SECRET")
 	}
 
 	clientID := os.Getenv("AUTH_CLIENTID")
-	if clientID != "" && len(clientID) > 0 {
-		common.OAuthCfgInfo.ClientID = clientID
+	if clientID == "" {
+		clientID = os.Getenv("CLIENTID")
 	}
 
 	cookieSecret := os.Getenv("AUTH_COOKIESECRET")
-	if cookieSecret != "" && len(cookieSecret) > 0 {
-		common.OAuthCfgInfo.Secret = cookieSecret
+	if cookieSecret == "" {
+		cookieSecret = os.Getenv("COOKIE_SECRET")
 	}
 
+	common.OAuthStore = sessions.NewCookieStore([]byte(cookieSecret))
+
 	common.OAuth2Cfg = &oauth2.Config{
-		ClientID:     common.OAuthCfgInfo.ClientID,
-		ClientSecret: common.OAuthCfgInfo.ClientSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  common.AuthorizeURL,
 			TokenURL: common.TokenURL,
 		},
-		RedirectURL: common.OAuthCfgInfo.RedirectURL,
-		Scopes:      common.OAuthCfgInfo.Scopes,
+		RedirectURL: redirectURL,
+		Scopes:      []string{"openid", "email", "profile"},
 	}
 }
 
 // InitDbConfig initialises the db config
 func initDbConfig() {
-	dbConfigFile, err := ioutil.ReadFile(configs["db"])
-	if err != nil {
-		log.Printf("dbConfigFile.Get err #%v ", err)
-	}
-
-	err = json.Unmarshal(dbConfigFile, &common.MongoConfig)
-	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
-	}
+	common.MongoConfig = new(common.DbConfig)
 
 	dbhost := os.Getenv("DB_HOST")
-	if dbhost != "" && len(dbhost) > 0 {
-		common.MongoConfig.MongoDBHosts = dbhost
+	if dbhost == "" {
+		dbhost = os.Getenv("MDB_HOST")
 	}
 
 	dbName := os.Getenv("DB_NAME")
-	if dbName != "" && len(dbName) > 0 {
-		common.MongoConfig.AuthDatabase = dbName
-		common.MongoConfig.TestDatabase = dbName
+	if dbName == "" {
+		dbName = os.Getenv("MDB_AUTHDB")
 	}
 
 	dbUser := os.Getenv("DB_USER")
-	if dbUser != "" && len(dbUser) > 0 {
-		common.MongoConfig.AuthUserName = dbUser
+	if dbUser == "" {
+		dbUser = os.Getenv("MDB_AUTHUSER")
 	}
 
 	dbPwd := os.Getenv("DB_PWD")
-	if dbPwd != "" && len(dbPwd) > 0 {
-		common.MongoConfig.AuthPassword = dbPwd
+	if dbPwd == "" {
+		dbPwd = os.Getenv("MDB_AUTHPWD")
 	}
+
+	common.MongoConfig.MongoDBHosts = dbhost
+	common.MongoConfig.AuthDatabase = dbName
+	common.MongoConfig.TestDatabase = dbName
+	common.MongoConfig.AuthUserName = dbUser
+	common.MongoConfig.AuthPassword = dbPwd
 }
 
 // InitTemplates load templates
