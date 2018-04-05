@@ -54,7 +54,7 @@ func Start(cfg *common.ServerConfig) *HTMLServer {
 	// Create the HTML Server
 	htmlServer := HTMLServer{
 		server: &http.Server{
-			Addr:           ":" + cfg.Host,
+			Addr:           cfg.Host,
 			Handler:        n,
 			ReadTimeout:    cfg.ReadTimeout * time.Second,
 			WriteTimeout:   cfg.WriteTimeout * time.Second,
@@ -69,7 +69,7 @@ func Start(cfg *common.ServerConfig) *HTMLServer {
 
 	// Start the listener
 	go func() {
-		fmt.Printf("\nHTMLServer : Service started : Host=%v\n", ":"+cfg.Host)
+		fmt.Printf("\nHTMLServer : Service started : Host=%v\n", cfg.Host)
 		htmlServer.server.ListenAndServe()
 		htmlServer.wg.Done()
 	}()
