@@ -167,12 +167,14 @@ func handlePostRequest(w http.ResponseWriter, r *http.Request, singleObj bool) {
 func storeData(trackerInfo common.CarTrackInfo, userEmail string) *mgo.ChangeInfo {
 
 	//fmt.Println(postedData)
+	fmt.Println(trackerInfo.TrackDate)
 
-	dateVal, parseErr := strconv.ParseFloat(trackerInfo.NumericValue, 64)
+	dateVal, parseErr := strconv.ParseFloat(trackerInfo.TrackDate, 64)
 	if parseErr != nil {
 		dateVal = 0
 	}
 
+	fmt.Println(dateVal)
 	sec, dec := math.Modf(dateVal)
 
 	numericVal, parseErr := strconv.ParseFloat(trackerInfo.NumericValue, 32)
