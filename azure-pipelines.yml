@@ -17,7 +17,7 @@ steps:
     containerRegistry: $(dockerId)
     repository: $(dockerId)/$(imageName)
     command: build
-    Dockerfile: '**/Dockerfile.production'
+    Dockerfile: '**/Dockerfile.builder'
 
 - task: Docker@2
   displayName: 'push'
