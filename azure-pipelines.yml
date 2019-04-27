@@ -12,15 +12,14 @@ variables:
 
 steps:
 - task: Docker@2
-  displayName: 'Build an image'
+  displayName: 'Build image'
   inputs:
     containerRegistry: $(dockerId)
     repository: $(dockerId)/$(imageName)
-    command: 'Build an image'
-    arguments: '--build-arg APP_VER=alpha.$(Build.BuildId)'
+    command: build
 
 - task: Docker@2
-  displayName: push
+  displayName: 'push'
   inputs:
     containerRegistry: $(dockerId)
     repository: $(dockerId)/$(imageName)
