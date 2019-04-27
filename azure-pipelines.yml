@@ -14,15 +14,15 @@ steps:
 - task: Docker@2
   displayName: 'Build image'
   inputs:
-    containerRegistry: $(dockerId)
-    repository: $(imageName)
+    containerRegistry: dockerhub
+    repository: $(dockerId)/$(imageName)
     command: build
 
 - task: Docker@2
   displayName: 'push'
   inputs:
-    containerRegistry: $(dockerId)
-    repository: $(imageName)
+    containerRegistry: dockerhub
+    repository: $(dockerId)/$(imageName)
     command: push
     tags: |
      $(Build.BuildId)
