@@ -17,6 +17,7 @@ steps:
     containerRegistry: $(dockerId)
     repository: $(dockerId)/$(imageName)
     command: build
+    Dockerfile: '**/Dockerfile.production'
 
 - task: Docker@2
   displayName: 'push'
@@ -27,4 +28,4 @@ steps:
     tags: |
      $(Build.BuildId)
      latest
-
+    
