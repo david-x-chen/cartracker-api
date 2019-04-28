@@ -31,6 +31,9 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /go/bin/cartrackerapi .
+COPY --from=builder /usr/local/go/src/cartracker.api/static ./static
+COPY --from=builder /usr/local/go/src/cartracker.api/templates ./templates
+COPY --from=builder /usr/local/go/src/cartracker.api/.env .
 
 EXPOSE 8000
 

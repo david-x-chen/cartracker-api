@@ -6,4 +6,4 @@ USERNAME=davidxchen
 # image name
 IMAGE=cartrackerapi
 
-docker build -f Dockerfile.builder -t $USERNAME/$IMAGE:latest .
+docker build -f Dockerfile -t $USERNAME/$IMAGE:latest .
